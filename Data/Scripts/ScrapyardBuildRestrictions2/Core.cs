@@ -64,18 +64,13 @@ namespace ZebraMonkeys.Scrapyard
                         MyComponentDefinition componentScrap = null;
                         if (MyDefinitionManager.Static.TryGetComponentDefinition(new MyDefinitionId(typeof(MyObjectBuilder_Component), mapping.ScrapPart), out componentScrap))
                         {
-                            var numComponents = 1 * (largeGrid ? LargeGridComponentMultiplier : 1);
-                            if (mapping.NumComponents > 0)
+                            var numComponents = mapping.NumComponents > 0 ? mapping.NumComponents : 1;
+                            if (largeGrid)
                             {
-                                numComponents = mapping.NumComponents;
-
-                                if (largeGrid)
-                                {
-                                    if (mapping.NumComponentsLargeGrid > 0)
-                                        numComponents = mapping.NumComponentsLargeGrid;
-                                    else
-                                        numComponents *= LargeGridComponentMultiplier;
-                                }
+                                if (mapping.NumComponentsLargeGrid > 0)
+                                    numComponents = mapping.NumComponentsLargeGrid;
+                                else
+                                    numComponents *= LargeGridComponentMultiplier;
                             }
 
                             BlockToolkit.Block_InsertInitialModComponent(cubeDef, componentScrap, numComponents, scrapDeconstruct);
