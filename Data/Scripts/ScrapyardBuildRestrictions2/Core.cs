@@ -13,6 +13,8 @@ namespace ZebraMonkeys.Scrapyard
         public Type TypeId { get; set; }
         public string Subtype { get; set; }
         public string ScrapPart { get; set; }
+        public int NumComponents { get; set; }
+        public int NumComponentsLargeGrid { get; set; }
     }
 
     [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
@@ -45,11 +47,13 @@ namespace ZebraMonkeys.Scrapyard
             var defs = MyDefinitionManager.Static.GetAllDefinitions();
             foreach (var def in defs)
             {
-                if (!(def is MyCubeBlockDefinition))
+                var cubeDef = def as MyCubeBlockDefinition;
+                if (cubeDef == null)
                     continue;
 
                 var typeId = def.Id.TypeId;
                 var subtypeId = def.Id.SubtypeName;
+                var largeGrid = cubeDef.CubeSize == MyCubeSize.Large;
 
                 var mapping = BlockRestrictions.Find(r => typeId.Equals(r.TypeId) && (String.IsNullOrEmpty(r.Subtype) || subtypeId.Contains(r.Subtype)));
                 if (mapping != null)
@@ -60,7 +64,21 @@ namespace ZebraMonkeys.Scrapyard
                         MyComponentDefinition componentScrap = null;
                         if (MyDefinitionManager.Static.TryGetComponentDefinition(new MyDefinitionId(typeof(MyObjectBuilder_Component), mapping.ScrapPart), out componentScrap))
                         {
-                            BlockToolkit.Block_InsertInitialModComponent(def as MyCubeBlockDefinition, componentScrap, 1, scrapDeconstruct);
+                            var numComponents = 1 * (largeGrid ? LargeGridComponentMultiplier : 1);
+                            if (mapping.NumComponents > 0)
+                            {
+                                numComponents = mapping.NumComponents;
+
+                                if (largeGrid)
+                                {
+                                    if (mapping.NumComponentsLargeGrid > 0)
+                                        numComponents = mapping.NumComponentsLargeGrid;
+                                    else
+                                        numComponents *= LargeGridComponentMultiplier;
+                                }
+                            }
+
+                            BlockToolkit.Block_InsertInitialModComponent(cubeDef, componentScrap, numComponents, scrapDeconstruct);
                         }
                         else
                         {
@@ -80,7 +98,8 @@ namespace ZebraMonkeys.Scrapyard
                     MyLog.Default.WriteLineAndConsole($"BuildRestrictions: Unspecified block: {typeId.ToString()} / {subtypeId}");
 
                     // block is not specified, use default scrap component
-                    BlockToolkit.Block_InsertInitialModComponent(def as MyCubeBlockDefinition, componentDefaultScrap, 1, scrapDeconstruct);
+                    var numComponents = 1 * (largeGrid ? LargeGridComponentMultiplier : 1);
+                    BlockToolkit.Block_InsertInitialModComponent(cubeDef, componentDefaultScrap, numComponents, scrapDeconstruct);
                 }
 
                 nCountBlocks++;

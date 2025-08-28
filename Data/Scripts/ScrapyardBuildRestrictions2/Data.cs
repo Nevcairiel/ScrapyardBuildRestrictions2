@@ -11,6 +11,7 @@ namespace ZebraMonkeys.Scrapyard
         private List<BlockMapping> BlockRestrictions;
 
         private string DefaultScrapComponent = "ScrapConstructionFrame";
+        private int LargeGridComponentMultiplier = 5;
 
         void InitBlockMappings()
         {
@@ -26,6 +27,8 @@ namespace ZebraMonkeys.Scrapyard
                 // TypeId: Main type of the block, eg. typeof(MyObjectBuilder_CubeBlock)
                 // Subtype: (partial) subtype of the block, optional
                 // ScrapPart: Subtype of the scrap component, if any
+                // NumComponents: Number of components required to build the block (1 if unspecified)
+                // NumComponentsLargeGrid: Number of components for large grid (num * LargeGridComponentMultiplier if unspecified)
                 //
                 // - A block that is specified without a scrap component will be buildable freely
                 // - A block with a scrap component will require this component to be placed
