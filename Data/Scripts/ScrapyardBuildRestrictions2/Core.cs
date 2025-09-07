@@ -55,7 +55,7 @@ namespace ZebraMonkeys.Scrapyard
                 var subtypeId = def.Id.SubtypeName;
                 var largeGrid = cubeDef.CubeSize == MyCubeSize.Large;
 
-                var mapping = BlockRestrictions.Find(r => typeId.Equals(r.TypeId) && (String.IsNullOrEmpty(r.Subtype) || subtypeId.Contains(r.Subtype)));
+                var mapping = BlockRestrictions.Find(r => typeId.Equals(r.TypeId) && (String.IsNullOrEmpty(r.Subtype) || (subtypeId.IndexOf(r.Subtype, StringComparison.OrdinalIgnoreCase) >= 0)));
                 if (mapping != null)
                 {
                     // use the specified scrap component

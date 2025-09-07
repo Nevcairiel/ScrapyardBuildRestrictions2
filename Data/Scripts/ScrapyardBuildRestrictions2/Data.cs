@@ -37,6 +37,9 @@ namespace ZebraMonkeys.Scrapyard
                 ////////////////////////////////////////////////////////////////////////////////////////////
                 /// Allowed blocks
 
+                // specific exemption, testing case-insensitive matching
+                new BlockMapping{ TypeId = typeof(MyObjectBuilder_CryoChamber), Subtype = "bed" },
+
                 // basic CubeBlocks (block without function, armor, decorative, etc)
                 new BlockMapping{ TypeId = typeof(MyObjectBuilder_CubeBlock) },
 
