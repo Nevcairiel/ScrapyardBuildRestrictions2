@@ -68,8 +68,8 @@ namespace ZebraMonkeys.Scrapyard
                     targetBlock.MaxIntegrityRatio = original_MaxIntegrityRatio * original_MaxIntegrity / targetBlock.MaxIntegrity;
                     targetBlock.DeformationRatio = targetBlock.DeformationRatio * original_MaxIntegrityRatio / targetBlock.MaxIntegrity;
                 }
-                if (!MyPerGameSettings.Destruction)
-                    targetBlock.Mass = block_Mass;
+
+                targetBlock.Mass = block_Mass;
 
                 targetBlock.CriticalIntegrityRatio = block_CriticalIntegrity / targetBlock.MaxIntegrity;
                 targetBlock.OwnershipIntegrityRatio = block_OwnershipIntegrity / targetBlock.MaxIntegrity;
