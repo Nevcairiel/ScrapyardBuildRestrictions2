@@ -25,6 +25,7 @@ namespace ZebraMonkeys.Scrapyard
                 //
                 // Parameters:
                 // TypeId: Main type of the block, eg. typeof(MyObjectBuilder_CubeBlock)
+                // TypeString: Alternative to the above for blocks that are not whitelisted, eg. "MyObjectBuilder_TargetDummyBlock"
                 // Subtype: (partial) subtype of the block, optional
                 // ScrapPart: Subtype of the scrap component, if any
                 // NumComponents: Number of components required to build the block (1 if unspecified)
@@ -126,10 +127,13 @@ namespace ZebraMonkeys.Scrapyard
                 new BlockMapping{ TypeId = typeof(MyObjectBuilder_SensorBlock) },
                 new BlockMapping{ TypeId = typeof(MyObjectBuilder_CameraBlock) },
                 new BlockMapping{ TypeId = typeof(MyObjectBuilder_SoundBlock) },
+                new BlockMapping{ TypeId = typeof(MyObjectBuilder_CargoContainer), Subtype = "LabCornerDesk" },
+
+                new BlockMapping{ TypeString = "MyObjectBuilder_TargetDummyBlock" },
 
                 ////////////////////////////////////////////////////////////////////////////////////////////
                 /// Blocked
-                
+
                 // PB, Timer et al
                 new BlockMapping{ TypeId = typeof(MyObjectBuilder_MyProgrammableBlock), ScrapPart = "ScrapConstructionFrame" },
                 new BlockMapping{ TypeId = typeof(MyObjectBuilder_TimerBlock), ScrapPart = "ScrapConstructionFrame" },
