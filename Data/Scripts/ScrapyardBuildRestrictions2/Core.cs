@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using Sandbox.Definitions;
+using Sandbox.ModAPI;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Utils;
@@ -21,6 +23,20 @@ namespace ZebraMonkeys.Scrapyard
     [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
     public partial class BuildRestrictionsSession : MySessionComponentBase
     {
+        public static string SettingsFileName = "BuildRestrictions.xml"; // the file that gets saved to world storage under your mod's folder
+
+        public class BuildRestrictionSettings
+        {
+            public string[] Exemptions;
+
+            public BuildRestrictionSettings()
+            {
+                Exemptions = new string[] { "CubeBlock/BlockSubtype" };
+            }
+        }
+
+        private BuildRestrictionSettings Settings { get; set; }
+
         public BuildRestrictionsSession()
         {
             InitBlockMappings();
@@ -28,6 +44,21 @@ namespace ZebraMonkeys.Scrapyard
 
         public override void LoadData()
         {
+            LoadConfig();
+
+            // process config
+            foreach (var def in Settings.Exemptions)
+            {
+                MyDefinitionId outDef;
+                if (MyDefinitionId.TryParse(def, out outDef) == true)
+                {
+                    MyLog.Default.WriteLineAndConsole($"BuildRestrictions: Parsed config type: {outDef.TypeId} / {outDef.SubtypeName}");
+
+                    // insert rule at top so it overrides any built-in rules
+                    BlockRestrictions.Insert(0, new BlockMapping { TypeId = outDef.TypeId, Subtype = outDef.SubtypeName });
+                }
+            }
+
             int nCountBlocks = 0;
             int nCountBlocksRestricted = 0, nCountBlocksAllowed = 0;
 
@@ -107,6 +138,48 @@ namespace ZebraMonkeys.Scrapyard
         protected override void UnloadData()
         {
             // TODO: restore blocks
+        }
+
+        private void LoadConfig()
+        {
+            // load file if exists then save it regardless so that it can be sanitized and updated
+            if (MyAPIGateway.Utilities.FileExistsInWorldStorage(SettingsFileName, typeof(BuildRestrictionSettings)))
+            {
+                try
+                {
+                    using (TextReader file = MyAPIGateway.Utilities.ReadFileInWorldStorage(SettingsFileName, typeof(BuildRestrictionSettings)))
+                    {
+                        string text = file.ReadToEnd();
+
+                        Settings = MyAPIGateway.Utilities.SerializeFromXML<BuildRestrictionSettings>(text);
+                        if (Settings != null)
+                            return;
+                    }
+                }
+                catch (Exception exc)
+                {
+                    MyLog.Default.WriteLineAndConsole($"BuildRestrictions: Could not load settings file");
+                    MyLog.Default.WriteLine(exc);
+                }
+            }
+
+            // if no config was loaded, save a new one
+            Settings = new BuildRestrictionSettings();
+
+            try
+            {
+                using (TextWriter writer = MyAPIGateway.Utilities.WriteFileInWorldStorage(SettingsFileName, typeof(BuildRestrictionSettings)))
+                {
+
+                    writer.Write(MyAPIGateway.Utilities.SerializeToXML<BuildRestrictionSettings>(Settings));
+
+                }
+            }
+            catch (Exception exc)
+            {
+                MyLog.Default.WriteLineAndConsole($"BuildRestrictions: Could not write settings file");
+                MyLog.Default.WriteLine(exc);
+            }
         }
     }
 }
