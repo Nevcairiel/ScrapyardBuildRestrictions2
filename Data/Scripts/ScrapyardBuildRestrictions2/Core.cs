@@ -24,6 +24,7 @@ namespace ZebraMonkeys.Scrapyard
     public partial class BuildRestrictionsSession : MySessionComponentBase
     {
         public static string SettingsFileName = "BuildRestrictions.xml"; // the file that gets saved to world storage under your mod's folder
+        const string VariableId = "Scrapyard.BuildRestrictions.Config"; // IMPORTANT: must be unique as it gets written in a shared space (sandbox.sbc)
 
         public class BuildRestrictionSettings
         {
@@ -44,7 +45,15 @@ namespace ZebraMonkeys.Scrapyard
 
         public override void LoadData()
         {
-            LoadConfig();
+            if (MyAPIGateway.Session.IsServer)
+            {
+                LoadConfigServer();
+                WriteWorldSettings();
+            }
+            else
+            {
+                LoadConfigClient();
+            }
 
             // process config
             foreach (var def in Settings.Exemptions)
@@ -140,7 +149,7 @@ namespace ZebraMonkeys.Scrapyard
             // TODO: restore blocks
         }
 
-        private void LoadConfig()
+        private void LoadConfigServer()
         {
             // load file if exists then save it regardless so that it can be sanitized and updated
             if (MyAPIGateway.Utilities.FileExistsInWorldStorage(SettingsFileName, typeof(BuildRestrictionSettings)))
@@ -179,6 +188,29 @@ namespace ZebraMonkeys.Scrapyard
             {
                 MyLog.Default.WriteLineAndConsole($"BuildRestrictions: Could not write settings file");
                 MyLog.Default.WriteLine(exc);
+            }
+        }
+
+        private void WriteWorldSettings()
+        {
+            string saveText = MyAPIGateway.Utilities.SerializeToXML<BuildRestrictionSettings>(Settings);
+            MyAPIGateway.Utilities.SetVariable<string>(VariableId, saveText);
+        }
+
+        private void LoadConfigClient()
+        {
+            string text;
+            if (!MyAPIGateway.Utilities.GetVariable<string>(VariableId, out text))
+            {
+                MyLog.Default.WriteLineAndConsole($"BuildRestrictions: no session config");
+                return;
+            }
+
+            Settings = MyAPIGateway.Utilities.SerializeFromXML<BuildRestrictionSettings>(text);
+            if (Settings == null)
+            {
+                MyLog.Default.WriteLineAndConsole($"BuildRestrictions: unable to parse xml");
+                Settings = new BuildRestrictionSettings();
             }
         }
     }
