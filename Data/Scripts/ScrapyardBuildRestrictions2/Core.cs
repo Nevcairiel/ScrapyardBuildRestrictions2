@@ -53,6 +53,9 @@ namespace ZebraMonkeys.Scrapyard
             else
             {
                 LoadConfigClient();
+
+                if (Settings == null)
+                    Settings = new BuildRestrictionSettings();
             }
 
             // process config
@@ -199,18 +202,26 @@ namespace ZebraMonkeys.Scrapyard
 
         private void LoadConfigClient()
         {
-            string text;
-            if (!MyAPIGateway.Utilities.GetVariable<string>(VariableId, out text))
+            try
             {
-                MyLog.Default.WriteLineAndConsole($"BuildRestrictions: no session config");
-                return;
-            }
+                string text;
+                if (!MyAPIGateway.Utilities.GetVariable<string>(VariableId, out text))
+                {
+                    MyLog.Default.WriteLineAndConsole($"BuildRestrictions: no session config");
+                    return;
+                }
 
-            Settings = MyAPIGateway.Utilities.SerializeFromXML<BuildRestrictionSettings>(text);
-            if (Settings == null)
+                Settings = MyAPIGateway.Utilities.SerializeFromXML<BuildRestrictionSettings>(text);
+                if (Settings == null)
+                {
+                    MyLog.Default.WriteLineAndConsole($"BuildRestrictions: unable to parse xml");
+                    return;
+                }
+            }
+            catch (Exception exc)
             {
-                MyLog.Default.WriteLineAndConsole($"BuildRestrictions: unable to parse xml");
-                Settings = new BuildRestrictionSettings();
+                MyLog.Default.WriteLineAndConsole($"BuildRestrictions: Could not write settings file");
+                MyLog.Default.WriteLine(exc);
             }
         }
     }
