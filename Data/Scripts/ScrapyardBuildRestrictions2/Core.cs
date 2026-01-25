@@ -196,8 +196,16 @@ namespace ZebraMonkeys.Scrapyard
 
         private void WriteWorldSettings()
         {
-            string saveText = MyAPIGateway.Utilities.SerializeToXML<BuildRestrictionSettings>(Settings);
-            MyAPIGateway.Utilities.SetVariable<string>(VariableId, saveText);
+            try
+            {
+                string saveText = MyAPIGateway.Utilities.SerializeToXML<BuildRestrictionSettings>(Settings);
+                MyAPIGateway.Utilities.SetVariable<string>(VariableId, saveText);
+            }
+            catch (Exception exc)
+            {
+                MyLog.Default.WriteLineAndConsole($"BuildRestrictions: Could not write world settings");
+                MyLog.Default.WriteLine(exc);
+            }
         }
 
         private void LoadConfigClient()
@@ -220,7 +228,7 @@ namespace ZebraMonkeys.Scrapyard
             }
             catch (Exception exc)
             {
-                MyLog.Default.WriteLineAndConsole($"BuildRestrictions: Could not write settings file");
+                MyLog.Default.WriteLineAndConsole($"BuildRestrictions: Could not load session settings");
                 MyLog.Default.WriteLine(exc);
             }
         }
