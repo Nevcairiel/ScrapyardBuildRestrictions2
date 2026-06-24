@@ -1,3 +1,10 @@
-.vs
-**/bin/
-**/obj/
+# generated files
+/bin
+/obj
+
+# mdk local
+/mdk.local.ini
+
+# placeholders
+/Content/Other content folders
+/Content/Data/SBC files can go here
